@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.xls
+*.xlsx
+uploaded_files/*.xls*
+processed/*.xls*
+.DS_Store
