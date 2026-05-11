@@ -1,108 +1,93 @@
 # Pharmacy ETL & Search Service
 
-Pet-проект для автоматической загрузки данных аптек из Excel в MySQL с поиском по лемматизации.
+A pet project for automatic loading of pharmacy data from Excel into MySQL with lemmatization-based search.
 
-## Возможности
+## Features
 
-- 📁 Мониторинг папки с Excel-файлами (`.xls`, `.xlsx`).
-- ⚙️ Парсинг с пропуском служебных строк (настраивается в `config.py`).
-- 🧹 Очистка данных: преобразование номеров аптек в числа, обработка пустых значений.
-- 🗄️ Создание и заполнение таблиц `pharmacies`, `file_list`, `status` в MySQL.
-- 🔍 Проверка на дубликаты перед вставкой (уникальность по всем полям).
-- 🚀 Пакетная вставка (batch insert) и многопоточная обработка файлов (до 5 одновременно).
-- 📝 Логирование статуса каждого файла (успешно/ошибка) в таблицу `file_list`.
-- 📦 Автоматическое архивирование обработанных файлов с переименованием по ID.
-- 💬 Поисковый движок с лемматизацией (pymorphy2) и фильтрацией стоп-слов.
-- ❌ Отказоустойчивость: ошибка в одном файле не останавливает сервис.
+- 📁 Monitors a folder for Excel files (`.xls`, `.xlsx`).
+- ⚙️ Parses files with configurable skip rows (`config.py`).
+- 🧹 Data cleaning: converts pharmacy numbers to integers, handles empty values.
+- 🗄️ Creates and populates tables `pharmacies`, `file_list`, `status` in MySQL.
+- 🔍 Duplicate check before insert (uniqueness across all fields).
+- 🚀 Batch insert and multi‑threaded file processing (up to 5 workers).
+- 📝 Logs file processing status (success/error) into the `file_list` table.
+- 📦 Processed files are moved to an archive folder and renamed by file ID.
+- 💬 Lemmatization‑based search engine with pymorphy2 and stop‑word filtering.
+- ❌ Fault‑tolerant: errors in one file do not stop the service.
 
-## Технологии
+## Technologies
 
 - **Python 3.8+**
-- **Pandas** – чтение Excel, обработка данных.
-- **mysql-connector-python** – работа с MySQL.
-- **pymorphy2** – лемматизация для русского языка.
-- **concurrent.futures / threading** – многопоточность.
-- **MySQL** – база данных.
+- **Pandas** – Excel parsing, data manipulation
+- **mysql-connector-python** – MySQL interface
+- **pymorphy2** – lemmatization for Russian language
+- **concurrent.futures / threading** – multithreading
+- **MySQL** – database
 
-## Установка и настройка
+## Installation & Setup
 
-### 1. Клонируй репозиторий
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/zhuckan/pharmacy-etl.git
 cd pharmacy-etl
 
-### 2. Установи зависимости
-Желательно создать виртуальное окружение:
+### 2. Install dependencies
+It is recommended to use a virtual environment:
 
 bash
 python -m venv venv
-source venv/bin/activate  # для Linux/Mac
-venv\Scripts\activate     # для Windows
+source venv/bin/activate    # Linux / macOS
+venv\Scripts\activate       # Windows
 
-Установи нужные пакеты:
+Install required packages:
 
 bash
 pip install pandas mysql-connector-python pymorphy2 openpyxl
 
-### 3. Настрой MySQL
-Убедись, что MySQL запущен. Создай базу данных (можно назвать pharmacies_db или другую – укажи в config.py).
-В файле config.py пропиши свои параметры подключения:
+### 3. Configure MySQL
+Make sure MySQL is running. Create a database (e.g., pharmacies_db) and update config.py with your connection details:
 
 python
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'твой_пароль',   # если нет пароля, оставь пустым
+    'password': 'your_password',   # leave empty if no password
     'database': 'pharmacies_db',
 }
-Остальные настройки можно оставить по умолчанию.
+Other settings in config.py can be left as default.
 
-### 4. Создай нужные папки
-По умолчанию сервис ожидает папки:
+### 4. Create necessary folders
+By default, the service expects the following directories:
 
-uploaded_files – сюда кладёшь Excel-файлы для обработки.
+uploaded_files – place Excel files here for processing.
 
-processed – сюда будут перемещаться обработанные файлы (внутри создадутся подпапки по датам).
+processed – processed files are moved here (subfolders by date are created automatically).
 
-Если хочешь другие пути – поменяй в config.py.
+You can change these paths in config.py.
 
-### 5. Использование
-Запуск сервиса-наблюдателя (ETL)
+### 5. Usage
+Start the ETL watcher
 bash
 python main.py
-Сервис начнёт сканировать папку uploaded_files каждые 5 секунд (интервал настраивается).
-Просто положи туда Excel-файл, и он будет обработан. В консоли увидишь логи.
+The service will scan uploaded_files every 5 seconds (configurable).
+Place an Excel file inside – it will be processed automatically. Logs appear in the console.
 
-### 6. Запуск поискового модуля
+### 6. Launch the search module
 bash
 python search_main.py
-Откроется интерактивный поиск. Вводи запросы типа:
+An interactive search prompt opens. Example queries:
 
-аптеки на Ленина
+аптеки на Ленина (pharmacies on Lenin street)
 
 Минск, улица Янки Купалы 15
 
-номер 123
+номер 123 (number 123)
 
 +375 29 1234567
 
-Поиск сам приведёт слова к нормальной форме, отбросит стоп-слова и найдёт совпадения. Если найдено больше 10 записей – попросит уточнить запрос.
-
-### 7. Структура проекта
-config.py – конфигурация (БД, пути, настройки).
-
-database.py – класс для работы с MySQL (создание таблиц, вставка данных).
-
-excel_parser.py – парсинг Excel с помощью Pandas.
-
-service.py – основной класс DataWatcher, который отслеживает папку и запускает обработку.
-
-main.py – точка входа для запуска сервиса.
-
-search_engine.py – класс поиска с лемматизацией.
-
-search_main.py – запуск поиска.
+The engine normalizes words, removes stop‑words, and returns matches.
+If more than 10 results are found, it asks to refine the query.
 
 uploaded_files/ – папка для входящих файлов (нужно создать).
 
