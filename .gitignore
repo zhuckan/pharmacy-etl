@@ -5,3 +5,4 @@ __pycache__/
 uploaded_files/*.xls*
 processed/*.xls*
 .DS_Store
+.DS_Store
