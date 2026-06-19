@@ -4,16 +4,16 @@ A pet project for automatic loading of pharmacy data from Excel into MySQL with 
 
 ## Features
 
-- 📁 Monitors a folder for Excel files (`.xls`, `.xlsx`).
-- ⚙️ Parses files with configurable skip rows (`config.py`).
-- 🧹 Data cleaning: converts pharmacy numbers to integers, handles empty values.
-- 🗄️ Creates and populates tables `pharmacies`, `file_list`, `status` in MySQL.
-- 🔍 Duplicate check before insert (uniqueness across all fields).
-- 🚀 Batch insert and multi‑threaded file processing (up to 5 workers).
-- 📝 Logs file processing status (success/error) into the `file_list` table.
-- 📦 Processed files are moved to an archive folder and renamed by file ID.
-- 💬 Lemmatization‑based search engine with pymorphy2 and stop‑word filtering.
-- ❌ Fault‑tolerant: errors in one file do not stop the service.
+- Monitors a folder for Excel files (`.xls`, `.xlsx`).
+- Parses files with configurable skip rows (`config.py`).
+- Data cleaning: converts pharmacy numbers to integers, handles empty values.
+- Creates and populates tables `pharmacies`, `file_list`, `status` in MySQL.
+- Duplicate check before insert (uniqueness across all fields).
+- Batch insert and multi‑threaded file processing (up to 5 workers).
+- Logs file processing status (success/error) into the `file_list` table.
+- Processed files are moved to an archive folder and renamed by file ID.
+- Lemmatization‑based search engine with pymorphy2 and stop‑word filtering.
+- Fault‑tolerant: errors in one file do not stop the service.
 
 ## Technologies
 
