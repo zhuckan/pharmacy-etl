@@ -30,7 +30,8 @@ A pet project for automatic loading of pharmacy data from Excel into MySQL with 
 
 ```bash
 git clone https://github.com/zhuckan/pharmacy-etl.git
-cd pharmacy-etl```
+cd pharmacy-etl
+```
 
 ### 2. Install dependencies
 It is recommended to use a virtual environment:
