@@ -1,18 +1,23 @@
+import logging
+import threading
+from datetime import datetime
+from typing import Dict, Any
+
 import mysql.connector
 import pandas as pd
-from datetime import datetime
-import threading
+
+logger = logging.getLogger(__name__)
 
 class Database:
     _insert_lock = threading.Lock()
 
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, Any]):
         self._config = config
         self._conn = None
         self._cursor = None
         self._connect()
 
-    def _connect(self):
+    def _connect(self) -> None:
         self._conn = mysql.connector.connect(
             host=self._config['host'],
             user=self._config['user'],
@@ -22,7 +27,7 @@ class Database:
         self._cursor.execute(f"CREATE DATABASE IF NOT EXISTS {self._config['database']}")
         self._cursor.execute(f"USE {self._config['database']}")
 
-    def create_status_table(self):
+    def create_status_table(self) -> None:
         self._cursor.execute("""
             CREATE TABLE IF NOT EXISTS status (
                 id INT PRIMARY KEY,
@@ -32,7 +37,7 @@ class Database:
         self._cursor.execute("INSERT IGNORE INTO status (id, result) VALUES (1, 'Успешно'), (2, 'Ошибка')")
         self._conn.commit()
 
-    def create_fileList_table(self):
+    def create_file_list_table(self) -> None:
         self._cursor.execute("""
             CREATE TABLE IF NOT EXISTS file_list (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -44,7 +49,7 @@ class Database:
         """)
         self._conn.commit()
 
-    def insert_fileList(self, file_name, status_id):
+    def insert_file_list(self, file_name: str, status_id: int) -> int:
         received_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self._cursor.execute(
             "INSERT INTO file_list (name, date, statusId) VALUES (%s, %s, %s)",
@@ -53,7 +58,7 @@ class Database:
         self._conn.commit()
         return self._cursor.lastrowid
 
-    def create_and_fill_pharmacies(self, df):
+    def create_and_fill_pharmacies(self, df: pd.DataFrame) -> None:
         self._cursor.execute("""
             CREATE TABLE IF NOT EXISTS pharmacies (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -67,7 +72,7 @@ class Database:
         """)
         self._batch_insert(df)
 
-    def _batch_insert(self, df):
+    def _batch_insert(self, df: pd.DataFrame) -> None:
         with Database._insert_lock:
             batch_size = 50
             batch = []

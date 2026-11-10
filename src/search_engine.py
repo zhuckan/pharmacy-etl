@@ -1,10 +1,10 @@
-import warnings
-warnings.filterwarnings("ignore", message="pkg_resources is deprecated")
-
+import logging
 import mysql.connector
 import re
 from config import DB_CONFIG
 from pymorphy2 import MorphAnalyzer
+
+logger = logging.getLogger(__name__)
 
 class SearchEngine:
     def __init__(self, config):
@@ -55,7 +55,8 @@ class SearchEngine:
 
     def run(self):
         self._connect()
-        print("Привет! Я помогу тебе найти аптеку. Укажи город, улицу или номер аптеки (например: 'аптеки в Минске' или 'улица Ленина 5').")
+        print("Привет! Я помогу тебе найти аптеку. Укажи город, улицу или номер аптеки.")
+        print("Например: 'аптеки в Минске' или 'улица Ленина 5'.\n")
 
         try:
             while True:
@@ -65,7 +66,7 @@ class SearchEngine:
 
                 groups = self._get_search_groups(text)
                 if not groups:
-                    print("Запрос не содержит значимых слов. Пожалуйста, уточните город, улицу или номер аптеки.\n")
+                    print("Запрос не содержит значимых слов. Уточните город, улицу или номер.\n")
                     continue
 
                 conditions = []
@@ -86,19 +87,19 @@ class SearchEngine:
                 rows = self.cursor.fetchall()
 
                 if not rows:
-                    print("По вашему запросу ничего не найдено. Попробуйте изменить формулировку или указать другие данные.\n")
+                    print("Ничего не найдено. Попробуйте изменить запрос.\n")
                 elif len(rows) > 10:
-                    print("Найдено слишком много вариантов (больше 10). Пожалуйста, уточните улицу или добавьте более конкретные параметры поиска.\n")
+                    print("Найдено больше 10 вариантов. Уточните улицу или номер.\n")
                 else:
                     for row in rows:
                         print(
                             f"Название: {row['pharmacyName'] or '—'} "
                             f"Номер: {row['pharmacyNumber'] or '—'} "
-                            f"Населённый пункт: {row['locality'] or '—'} "
+                            f"Населенный пункт: {row['locality'] or '—'} "
                             f"Улица: {row['street'] or '—'} "
                             f"Дом: {row['houseNumber'] or '—'} "
                             f"Телефон: {row['pharmacyPhoneNumber'] or '—'} "
                         )
                     print()
         except KeyboardInterrupt:
-            print("\nПоиск завершён.")
+            print("\nПоиск завершен.")
